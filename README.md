@@ -1,59 +1,139 @@
-# MongoDB Fundamentals - Week 1
+# 📚 PLP Bookstore — MongoDB Project
 
-## Setup Instructions
+A modular MongoDB-based bookstore system designed for diagnostics, sponsor-ready reporting, and full-stack integration. Includes CRUD operations, advanced queries, aggregation pipelines, and indexing — deployable locally or via MongoDB Atlas.
 
-Before you begin this assignment, please make sure you have the following installed:
+---
 
-1. **MongoDB Community Edition** - [Installation Guide](https://www.mongodb.com/docs/manual/administration/install-community/)
-2. **MongoDB Shell (mongosh)** - This is included with MongoDB Community Edition
-3. **Node.js** - [Download here](https://nodejs.org/)
+## 🚀 Setup Options
 
-### Node.js Package Setup
+### 🔧 Option A: Local MongoDB
+1. Install MongoDB: [Download here](https://www.mongodb.com/try/download/community)
+2. Start server:
+   ```bash
+   mongod
 
-Once you have Node.js installed, run the following commands in your assignment directory:
+Connect via shell:
 
-```bash
-# Initialize a package.json file
-npm init -y
+mongo
 
-# Install the MongoDB Node.js driver
-npm install mongodb
-```
+☁️ Option B: MongoDB Atlas (Cloud)
 
-## Assignment Overview
+Create a free cluster at mongodb.com/cloud/atlas
 
-This week focuses on MongoDB fundamentals including:
-- Creating and connecting to MongoDB databases
-- CRUD operations (Create, Read, Update, Delete)
-- MongoDB queries and filters
-- Aggregation pipelines
-- Indexing for performance
+Whitelist your IP and create a database user
 
-## Submission
+Connect using MongoDB Compass or shell:
 
-Complete all the exercises in this assignment and push your code to GitHub using the provided GitHub Classroom link.
+mongo "mongodb+srv://<your-cluster-url>"
 
-## Getting Started
+🐳 Optional: Docker Setup
 
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install MongoDB locally or set up a MongoDB Atlas account
-4. Run the provided `insert_books.js` script to populate your database
-5. Complete the tasks in the assignment document
+docker run -d -p 27017:27017 --name plp-mongo mongo
 
-## Files Included
+To connect:
 
-- `Week1-Assignment.md`: Detailed assignment instructions
-- `insert_books.js`: Script to populate your MongoDB database with sample book data
+mongo --host localhost --port 27017
 
-## Requirements
+🗂️ Database & Collection
 
-- Node.js (v18 or higher)
-- MongoDB (local installation or Atlas account)
-- MongoDB Shell (mongosh) or MongoDB Compass
+use plp_bookstore
+db.createCollection("books")
 
-## Resources
+📥 Insert Sample Data
 
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [MongoDB University](https://university.mongodb.com/)
-- [MongoDB Node.js Driver](https://mongodb.github.io/node-mongodb-native/) 
+Run insert_books.js in the Mongo shell or Compass:
+
+db.books.insertMany([
+  {
+    title: "The Alchemist",
+    author: "Paulo Coelho",
+    genre: "Fiction",
+    published_year: 1988,
+    price: 12.99,
+    in_stock: true,
+    pages: 208,
+    publisher: "HarperOne"
+  },
+  // Add 9+ more books
+])
+
+🔧 Basic CRUD Operations
+
+// Find all books in a specific genre
+db.books.find({ genre: "Fiction" })
+
+// Find books published after a certain year
+db.books.find({ published_year: { $gt: 2010 } })
+
+// Find books by a specific author
+db.books.find({ author: "Robert C. Martin" })
+
+// Update the price of a specific book
+db.books.updateOne({ title: "Clean Code" }, { $set: { price: 24.99 } })
+
+// Delete a book by its title
+db.books.deleteOne({ title: "The Alchemist" })
+
+🔍 Advanced Queries
+
+// In stock and published after 2010
+db.books.find({ in_stock: true, published_year: { $gt: 2010 } })
+
+// Projection: title, author, price
+db.books.find({}, { title: 1, author: 1, price: 1, _id: 0 })
+
+// Sort by price
+db.books.find().sort({ price: 1 }) // Ascending
+db.books.find().sort({ price: -1 }) // Descending
+
+// Pagination (5 per page)
+db.books.find().skip(0).limit(5) // Page 1
+db.books.find().skip(5).limit(5) // Page 2
+
+📊 Aggregation Pipelines
+
+// Average price by genre
+db.books.aggregate([
+  { $group: { _id: "$genre", averagePrice: { $avg: "$price" } } }
+])
+
+// Author with most books
+db.books.aggregate([
+  { $group: { _id: "$author", count: { $sum: 1 } } },
+  { $sort: { count: -1 } },
+  { $limit: 1 }
+])
+
+// Group by publication decade
+db.books.aggregate([
+  { $project: { decade: { $subtract: ["$published_year", { $mod: ["$published_year", 10] }] } } },
+  { $group: { _id: "$decade", count: { $sum: 1 } } },
+  { $sort: { _id: 1 } }
+])
+
+⚡ Indexing
+
+// Index on title
+db.books.createIndex({ title: 1 })
+
+// Compound index on author and published_year
+db.books.createIndex({ author: 1, published_year: -1 })
+
+🧠 Author
+
+HASSAN MOHAMMED SAIDICT Technician | Full-Stack Developer | Smart City StrategistSpecializing in MERN stack, sponsor-ready dashboards, and modular diagnostics.
+
+🌐 GitHub Pages (Optional)
+
+To showcase this project:
+
+Create a docs/ folder with screenshots or markdown guides
+
+Enable GitHub Pages in repository settings
+
+Set source to main → /docs
+
+📎 License
+
+MIT — free to use, modify, and share.
+
